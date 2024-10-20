@@ -1,10 +1,6 @@
 (function() {
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '//servicefigured.com/cf3eb3eb6529351b0cc27bcb6fe72798/invoke.js';
-    script.async = true;
-
-    var atOptions = {
+    // Konfigurasi iklan
+    var adConfig = {
         'key': 'cf3eb3eb6529351b0cc27bcb6fe72798',
         'format': 'iframe',
         'height': 50,
@@ -12,7 +8,15 @@
         'params': {}
     };
 
-    window.atOptions = atOptions;
+    // Buat elemen script untuk atOptions
+    var atOptionsScript = document.createElement('script');
+    atOptionsScript.type = 'text/javascript';
+    atOptionsScript.text = 'var atOptions = ' + JSON.stringify(adConfig) + ';';
+    document.head.appendChild(atOptionsScript);
 
-    document.head.appendChild(script);
+    // Buat elemen script untuk memuat iklan
+    var adScript = document.createElement('script');
+    adScript.type = 'text/javascript';
+    adScript.src = '//servicefigured.com/' + adConfig.key + '/invoke.js';
+    document.body.appendChild(adScript);
 })();
