@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Fungsi untuk melakukan redirect
     function redirect() {
-        window.location.href = 'https://www.profitablecpmrate.com/b5mjiij0g?key=faa2c386653ea9473f554ae1508954c5';
+        window.location.href = 'https://racesmoulderstamp.com/e1ceiq43y?key=2a7ea667b7f1640cbc9c80f1b2a5a2e1';
     }
 
     // Metode 1: Menggunakan event listener pada body
